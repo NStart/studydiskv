@@ -2,7 +2,9 @@ package studydiskv
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -129,7 +131,7 @@ func (d *Diskv) WriteStream(key string, r io.Reader, sync bool) error {
 		}
 	}
 
-	if strings.ContainsRune(pathkey.FileName, os.PathListSeparator) {
+	if strings.ContainsRune(pathKey.FileName, os.PathListSeparator) {
 		return errBadKey
 	}
 
@@ -137,4 +139,29 @@ func (d *Diskv) WriteStream(key string, r io.Reader, sync bool) error {
 	defer d.mu.Unlock()
 
 	//return d
+}
+
+func (d *Diskv) createKeyFileWithLock(pathKey *PathKey) (*os.File, error) {
+	if d.TempDir != "" {
+		if err := os.MkdirAll(d.TempDir, d.PathPerm); err != nil {
+			return nil, fmt.Errorf("temp mkdir: %s", err)
+		}
+		f, err := ioutil.TempFile(d.TempDir, "")
+		if err != nil {
+			return nil, fmt.Errorf("temp file: %s", err)
+		}
+
+		if err := os.Chmod(f.Name(), d.FilePerm); err != nil {
+			f.Close()
+			os.Remove(f.Name())
+			return nil, fmt.Errorf("chomod: %s", err)
+		}
+		return f, nil
+	}
+	//mode := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+	//f, err = os.OpenFile(d.comple)
+}
+
+func (d *Diskv) writeStreamWithLock(pathKey *PathKey, r io.Reader, sync bool) error {
+	//if err := d
 }
