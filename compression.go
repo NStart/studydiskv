@@ -1,6 +1,8 @@
 package studydiskv
 
 import (
+	"compress/flate"
+	"compress/gzip"
 	"compress/zlib"
 	"io"
 )
@@ -10,8 +12,19 @@ type Compression interface {
 	Reader(src io.Reader) (io.ReadCloser, error)
 }
 
-func NewGzipCompression(level int) Compression {
-	return NewZipCompressionLevelDict(level, nil)
+func NewGzipCompression() Compression {
+	return NewGzipCompressionLevel(flate.DefaultCompression)
+}
+
+func NewGzipCompressionLevel(level int) Compression {
+	return &genericCompression{
+		wf: func(w io.Writer) (io.WriteCloser, error) {
+			return gzip.NewWriterLevel(w, level)
+		},
+		rf: func(r io.Reader) (io.ReadCloser, error) {
+			return gzip.NewReader(r)
+		},
+	}
 }
 
 func NewZipCompressionLevelDict(level int, dict []byte) Compression {

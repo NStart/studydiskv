@@ -30,7 +30,7 @@ type BTreeIndex struct {
 	*btree.BTree
 }
 
-func (i *BTreeIndex) InitialLize(less LessFunction, keys <-chan string) {
+func (i *BTreeIndex) Initialize(less LessFunction, keys <-chan string) {
 	i.Lock()
 	defer i.Unlock()
 	i.LessFunction = less
