@@ -30,7 +30,9 @@ func TestIssue2A(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		//if !cmpB
+		if !cmpByte(buf, []byte(input)) {
+			t.Fatalf("read #%d: '%s' != '%s'", i+1, string(buf), input)
+		}
 		rc.Close()
 		t.Logf("read #%d in %s", i+1, time.Since(began))
 	}
